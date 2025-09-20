@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Upload, Download, Settings } from "lucide-react"
+import { Calendar, Upload, Download, Settings, Play } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 interface UploadedImage {
@@ -17,9 +17,12 @@ interface UploadedImage {
 
 interface TopBarProps {
   onImagesUploaded?: (images: UploadedImage[]) => void
+  onStartAnalysis?: () => void
+  hasUploadedImages?: boolean
+  isAnalyzing?: boolean
 }
 
-export default function TopBar({ onImagesUploaded }: TopBarProps) {
+export default function TopBar({ onImagesUploaded, onStartAnalysis, hasUploadedImages, isAnalyzing }: TopBarProps) {
   const [selectedProject, setSelectedProject] = useState("field-alpha-01")
   const [dateRange, setDateRange] = useState("last-7-days")
 
@@ -45,6 +48,12 @@ export default function TopBar({ onImagesUploaded }: TopBarProps) {
 
     if (onImagesUploaded) {
       onImagesUploaded(uploadedImages)
+    }
+  }
+
+  const handleStartAnalysis = () => {
+    if (onStartAnalysis) {
+      onStartAnalysis()
     }
   }
 
@@ -103,6 +112,16 @@ export default function TopBar({ onImagesUploaded }: TopBarProps) {
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Images
               </label>
+            </Button>
+
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleStartAnalysis}
+              disabled={!hasUploadedImages || isAnalyzing}
+            >
+              <Play className="w-4 h-4 mr-2" />
+              {isAnalyzing ? "Analyzing..." : "Start Analysis"}
             </Button>
 
             <Button variant="outline" size="sm">

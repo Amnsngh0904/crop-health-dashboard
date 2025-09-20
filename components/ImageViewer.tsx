@@ -21,14 +21,18 @@ interface ProcessedImage {
 
 interface ImageViewerProps {
   uploadedImages: UploadedImage[]
+  showAnalysisOutput?: boolean
 }
 
-export default function ImageViewer({ uploadedImages }: ImageViewerProps) {
+export default function ImageViewer({ uploadedImages, showAnalysisOutput }: ImageViewerProps) {
   const [selectedBand, setSelectedBand] = useState("ndvi")
   const [zoom, setZoom] = useState(100)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [processedImages, setProcessedImages] = useState<ProcessedImage[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  
+  // Output image zoom control
+  const [outputZoom, setOutputZoom] = useState(100)
 
   console.log("[v0] ImageViewer - uploadedImages array:", uploadedImages)
   console.log("[v0] ImageViewer - uploadedImages length:", uploadedImages.length)
@@ -144,96 +148,164 @@ export default function ImageViewer({ uploadedImages }: ImageViewerProps) {
   console.log("[v0] ImageViewer - currentImage:", currentImage?.name, currentImage?.url)
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">NDVI Image Viewer</CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">Field Alpha-01</Badge>
-            <Badge variant="outline">2024-01-15 14:30</Badge>
-            {processedImages.length > 0 && <Badge variant="default">{processedImages.length} images uploaded</Badge>}
-            {isProcessing && <Badge variant="secondary">Processing...</Badge>}
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <div className="space-y-4">
-          {processedImages.length > 1 && (
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
-                disabled={currentImageIndex === 0}
-              >
-                Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Image {currentImageIndex + 1} of {processedImages.length}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentImageIndex(Math.min(processedImages.length - 1, currentImageIndex + 1))}
-                disabled={currentImageIndex === processedImages.length - 1}
-              >
-                Next
-              </Button>
+    <div className="space-y-6">
+      {/* Original NDVI Image Viewer */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">NDVI Image Viewer</CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">Field Alpha-01</Badge>
+              <Badge variant="outline">2024-01-15 14:30</Badge>
+              {processedImages.length > 0 && <Badge variant="default">{processedImages.length} images uploaded</Badge>}
+              {isProcessing && <Badge variant="secondary">Processing...</Badge>}
             </div>
-          )}
+          </div>
+        </CardHeader>
 
-          {/* Band Selection */}
-          <Tabs value={selectedBand} onValueChange={setSelectedBand}>
-            <TabsList className="grid w-full grid-cols-1">
-              {bands.map((band) => (
-                <TabsTrigger key={band.id} value={band.id} className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${band.color}`} />
-                  {band.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+        <CardContent>
+          <div className="space-y-4">
+            {processedImages.length > 1 && (
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
+                  disabled={currentImageIndex === 0}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Image {currentImageIndex + 1} of {processedImages.length}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentImageIndex(Math.min(processedImages.length - 1, currentImageIndex + 1))}
+                  disabled={currentImageIndex === processedImages.length - 1}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
 
-            <TabsContent value={selectedBand} className="mt-4">
-              <div className="relative bg-muted rounded-lg overflow-hidden" style={{ aspectRatio: "16/10" }}>
-                {currentImage ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <img
-                      src={currentImage.url || "/placeholder.svg"}
-                      alt={`Uploaded image: ${currentImage.name}`}
-                      className="w-full h-full object-contain"
-                      style={{ transform: `scale(${zoom / 100})` }}
-                      onLoad={() => console.log("[v0] Image loaded successfully:", currentImage.name)}
-                      onError={(e) => {
-                        console.log("[v0] Image failed to load:", currentImage.name, currentImage.url, e)
-                        console.log("[v0] Error details:", e.currentTarget.src)
-                      }}
-                    />
-                    {/* Image name overlay */}
-                    <div className="absolute top-4 left-4 bg-background/80 px-3 py-2 rounded text-sm">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" />
-                        {currentImage.name}
+            {/* Band Selection */}
+            <Tabs value={selectedBand} onValueChange={setSelectedBand}>
+              <TabsList className="grid w-full grid-cols-1">
+                {bands.map((band) => (
+                  <TabsTrigger key={band.id} value={band.id} className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${band.color}`} />
+                    {band.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              <TabsContent value={selectedBand} className="mt-4">
+                <div className="relative bg-muted rounded-lg overflow-hidden" style={{ aspectRatio: "16/10" }}>
+                  {currentImage ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src={currentImage.url || "/placeholder.svg"}
+                        alt={`Uploaded image: ${currentImage.name}`}
+                        className="w-full h-full object-contain"
+                        style={{ transform: `scale(${zoom / 100})` }}
+                        onLoad={() => console.log("[v0] Image loaded successfully:", currentImage.name)}
+                        onError={(e) => {
+                          console.log("[v0] Image failed to load:", currentImage.name, currentImage.url, e)
+                          console.log("[v0] Error details:", e.currentTarget.src)
+                        }}
+                      />
+                      {/* Image name overlay */}
+                      <div className="absolute top-4 left-4 bg-background/80 px-3 py-2 rounded text-sm">
+                        <div className="flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4" />
+                          {currentImage.name}
+                        </div>
                       </div>
                     </div>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <ImageIcon className="w-16 h-16 mb-4" />
+                        <p className="text-lg font-medium">No Image Uploaded</p>
+                        <p className="text-sm">Upload an image to view NDVI analysis</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Image Controls Overlay */}
+                  <div className="absolute top-4 right-4 flex items-center gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => setZoom(Math.max(50, zoom - 25))}>
+                      <ZoomOut className="w-4 h-4" />
+                    </Button>
+                    <span className="text-sm bg-background/80 px-2 py-1 rounded">{zoom}%</span>
+                    <Button size="sm" variant="secondary" onClick={() => setZoom(Math.min(200, zoom + 25))}>
+                      <ZoomIn className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="secondary">
+                      <RotateCw className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="secondary">
+                      <Download className="w-4 h-4" />
+                    </Button>
                   </div>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground">
-                      <ImageIcon className="w-16 h-16 mb-4" />
-                      <p className="text-lg font-medium">No Image Uploaded</p>
-                      <p className="text-sm">Upload an image to view NDVI analysis</p>
+
+                  {/* Coordinates Display */}
+                  <div className="absolute bottom-4 left-4 bg-background/80 px-3 py-2 rounded text-sm">
+                    <div>Lat: 40.7128° N</div>
+                    <div>Lon: 74.0060° W</div>
+                    <div>Pixel: (320, 240)</div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Output Analysis Display - Only show if analysis has been started */}
+      {showAnalysisOutput && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Analysis Output</CardTitle>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Processed Result</Badge>
+                <Badge variant="outline">Field Alpha-01</Badge>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <div className="space-y-4">
+              <div className="relative bg-muted rounded-lg overflow-hidden" style={{ aspectRatio: "16/10" }}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img
+                    src="/output.png"
+                    alt="NDVI Analysis Output"
+                    className="w-full h-full object-contain"
+                    style={{ transform: `scale(${outputZoom / 100})` }}
+                    onLoad={() => console.log("[v0] Output image loaded successfully")}
+                    onError={(e) => {
+                      console.log("[v0] Output image failed to load:", e)
+                    }}
+                  />
+                  {/* Image name overlay */}
+                  <div className="absolute top-4 left-4 bg-background/80 px-3 py-2 rounded text-sm">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" />
+                      NDVI Analysis Result
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Image Controls Overlay */}
                 <div className="absolute top-4 right-4 flex items-center gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => setZoom(Math.max(50, zoom - 25))}>
+                  <Button size="sm" variant="secondary" onClick={() => setOutputZoom(Math.max(50, outputZoom - 25))}>
                     <ZoomOut className="w-4 h-4" />
                   </Button>
-                  <span className="text-sm bg-background/80 px-2 py-1 rounded">{zoom}%</span>
-                  <Button size="sm" variant="secondary" onClick={() => setZoom(Math.min(200, zoom + 25))}>
+                  <span className="text-sm bg-background/80 px-2 py-1 rounded">{outputZoom}%</span>
+                  <Button size="sm" variant="secondary" onClick={() => setOutputZoom(Math.min(200, outputZoom + 25))}>
                     <ZoomIn className="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="secondary">
@@ -244,17 +316,17 @@ export default function ImageViewer({ uploadedImages }: ImageViewerProps) {
                   </Button>
                 </div>
 
-                {/* Coordinates Display */}
+                {/* Analysis Info */}
                 <div className="absolute bottom-4 left-4 bg-background/80 px-3 py-2 rounded text-sm">
-                  <div>Lat: 40.7128° N</div>
-                  <div>Lon: 74.0060° W</div>
-                  <div>Pixel: (320, 240)</div>
+                  <div>Analysis: NDVI Vegetation Health</div>
+                  <div>Resolution: High (10m/pixel)</div>
+                  <div>Status: Complete</div>
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   )
 }
