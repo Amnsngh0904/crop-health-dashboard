@@ -1,61 +1,14 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Upload, Download, Settings, Play } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { Calendar, Download, Settings } from "lucide-react"
 
-interface UploadedImage {
-  file: File
-  url: string
-  name: string
-}
-
-interface TopBarProps {
-  onImagesUploaded?: (images: UploadedImage[]) => void
-  onStartAnalysis?: () => void
-  hasUploadedImages?: boolean
-  isAnalyzing?: boolean
-}
-
-export default function TopBar({ onImagesUploaded, onStartAnalysis, hasUploadedImages, isAnalyzing }: TopBarProps) {
+export default function TopBar() {
   const [selectedProject, setSelectedProject] = useState("field-alpha-01")
   const [dateRange, setDateRange] = useState("last-7-days")
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
-
-    const uploadedImages: UploadedImage[] = []
-
-    Array.from(files).forEach((file) => {
-      const url = URL.createObjectURL(file)
-      uploadedImages.push({
-        file,
-        url,
-        name: file.name,
-      })
-    })
-
-    console.log(
-      "[v0] Images uploaded:",
-      uploadedImages.map((img) => img.name),
-    )
-
-    if (onImagesUploaded) {
-      onImagesUploaded(uploadedImages)
-    }
-  }
-
-  const handleStartAnalysis = () => {
-    if (onStartAnalysis) {
-      onStartAnalysis()
-    }
-  }
 
   return (
     <Card className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
@@ -97,33 +50,8 @@ export default function TopBar({ onImagesUploaded, onStartAnalysis, hasUploadedI
             </div>
           </div>
 
-          {/* Right Section */}
+          {/* Right Section - removed upload and start analysis buttons */}
           <div className="flex items-center gap-2">
-            <Input
-              type="file"
-              accept="image/*,.tiff,.tif,.TIFF,.TIF"
-              className="hidden"
-              id="image-upload"
-              multiple
-              onChange={handleImageUpload}
-            />
-            <Button variant="outline" size="sm" asChild>
-              <label htmlFor="image-upload" className="cursor-pointer">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Images
-              </label>
-            </Button>
-
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={handleStartAnalysis}
-              disabled={!hasUploadedImages || isAnalyzing}
-            >
-              <Play className="w-4 h-4 mr-2" />
-              {isAnalyzing ? "Analyzing..." : "Start Analysis"}
-            </Button>
-
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export Data
