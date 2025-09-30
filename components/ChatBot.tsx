@@ -35,9 +35,11 @@ export default function ChatBot() {
     },
   ])
   const [inputValue, setInputValue] = useState("")
+  const [sending, setSending] = useState(false)
 
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const inputRef = useRef<string>("")
+  const endRef = useRef<HTMLDivElement | null>(null)
 
   // Keep a ref of inputValue for onend auto-send
   useEffect(() => {
@@ -57,13 +59,16 @@ export default function ChatBot() {
     recog.lang = selectedLanguage === "hi" ? "hi-IN" : "en-US"
 
     recog.onresult = (event: any) => {
-      // Use the last result; if interim, this updates the input field live
-      const res = event.results[event.results.length - 1]
-      const transcript = res[0]?.transcript ?? ""
-      setInputValue((prev) => {
-        // Replace with the latest interim or final transcript
-        return transcript
-      })
+      let finalText = ""
+      let interimText = ""
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const res = event.results[i]
+        if (res.isFinal) finalText += res[0].transcript
+        else interimText += res[0].transcript
+      }
+      const phrase = (finalText || interimText || "").trim()
+      setInputValue(phrase)
+      inputRef.current = phrase
     }
 
     recog.onerror = () => {
@@ -129,9 +134,9 @@ export default function ChatBot() {
     }
   }, [isVoiceEnabled])
 
-  function handleSendMessage(textOverride?: string) {
+  async function handleSendMessage(textOverride?: string) {
     const text = (textOverride ?? inputValue).trim()
-    if (!text) return
+    if (!text || sending) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -144,21 +149,63 @@ export default function ChatBot() {
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
 
-    setTimeout(() => {
-      const botResponses = {
-        en: "Thank you for your question. I'm analyzing your crop data and will provide insights based on the current NDVI values and field conditions. This is a placeholder response - you can integrate with your preferred AI service here.",
-        hi: "आपके प्रश्न के लिए धन्यवाद। मैं आपके फसल डेटा का विश्लेषण कर रहा हूं और वर्तमान NDVI मानों और खेत की स्थितियों के आधार पर जानकारी प्रदान करूंगा। यह एक प्लेसहोल्डर प्रतिक्रिया है - आप यहां अपनी पसंदीदा AI सेवा के साथ एकीकृत कर सकते हैं।",
-      }
+    try {
+      setSending(true)
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: text }],
+          language: selectedLanguage,
+        }),
+      })
 
+      if (!res.ok) {
+        throw new Error(`Request failed: ${res.status}`)
+      }
+      const data = await res.json()
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+      const content = data?.message ?? (selectedLanguage === "hi" ? "क्षमा करें, कोई उत्तर उपलब्ध नहीं है।" : "Sorry, no response.")
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: botResponses[selectedLanguage],
+        text: content,
         sender: "bot",
         timestamp: new Date(),
         language: selectedLanguage,
       }
       setMessages((prev) => [...prev, botMessage])
-    }, 1000)
+    } catch (e: any) {
+      const serverMsg = String(e?.message || "")
+      let errMsg = selectedLanguage === "hi" ? "त्रुटि: कृपया बाद में पुनः प्रयास करें।" : "Error: please try again later."
+      if (/GROQ_API_KEY/i.test(serverMsg)) {
+        errMsg =
+          selectedLanguage === "hi"
+            ? "सर्वर पर Groq API कुंजी सेट नहीं है। कृपया .env.local में GROQ_API_KEY जोड़ें और सर्वर पुनः प्रारंभ करें।"
+            : "Groq API key is missing on the server. Add GROQ_API_KEY to .env.local and restart the dev server."
+      }
+      // Very small domain fallback for common NDVI question
+      const lower = text.toLowerCase()
+      if (/\bndvi\b/.test(lower)) {
+        errMsg =
+          selectedLanguage === "hi"
+            ? "NDVI (Normalized Difference Vegetation Index) लाल और निकट-इन्फ्रारेड प्रकाश के अंतर से वनस्पति की हरियाली/स्वास्थ्य मापता है। मान 0 के करीब कम हरियाली और 1 के करीब घनी/स्वस्थ वनस्पति का संकेत देता है।"
+            : "NDVI (Normalized Difference Vegetation Index) measures plant greenness/health from the difference of red and near‑infrared reflectance. Values near 0 mean sparse vegetation; values closer to 1 indicate dense, healthy vegetation."
+      }
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          text: errMsg,
+          sender: "bot",
+          timestamp: new Date(),
+          language: selectedLanguage,
+        },
+      ])
+    } finally {
+      setSending(false)
+    }
   }
 
   async function requestMicPermissionOnce() {
@@ -176,11 +223,20 @@ export default function ChatBot() {
   const toggleRecording = async () => {
     const recog = recognitionRef.current
     if (!recog) {
-      alert(
+      const msg =
         selectedLanguage === "hi"
           ? "आपका ब्राउज़र स्पीच रिकग्निशन का समर्थन नहीं करता"
-          : "Your browser does not support speech recognition",
-      )
+          : "Your browser does not support speech recognition"
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 10).toString(),
+          text: msg,
+          sender: "bot",
+          timestamp: new Date(),
+          language: selectedLanguage,
+        },
+      ])
       return
     }
 
@@ -193,6 +249,8 @@ export default function ChatBot() {
       await requestMicPermissionOnce()
       try {
         setInputValue("") // reset input for new capture
+        inputRef.current = ""
+        recog.lang = selectedLanguage === "hi" ? "hi-IN" : "en-US"
         recog.start()
         setIsRecording(true)
       } catch {
@@ -201,8 +259,9 @@ export default function ChatBot() {
     }
   }
 
-  function handleKeyPress(e: React.KeyboardEvent) {
-    if (e.key === "Enter") {
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
       handleSendMessage()
     }
   }
@@ -223,6 +282,11 @@ export default function ChatBot() {
       },
     ])
   }, [selectedLanguage])
+
+  // Auto-scroll to bottom when messages update
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   return (
     <>
@@ -308,6 +372,7 @@ export default function ChatBot() {
                       </div>
                     </div>
                   ))}
+                  <div ref={endRef} />
                 </div>
               </ScrollArea>
 
@@ -316,7 +381,7 @@ export default function ChatBot() {
                 <Input
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                   placeholder={
                     selectedLanguage === "hi"
                       ? "अपने फसल स्वास्थ्य डेटा के बारे में पूछें..."
@@ -332,7 +397,7 @@ export default function ChatBot() {
                 >
                   {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
-                <Button onClick={() => handleSendMessage()} size="icon">
+                <Button onClick={() => handleSendMessage()} size="icon" disabled={sending}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>

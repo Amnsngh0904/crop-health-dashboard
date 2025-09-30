@@ -30,7 +30,13 @@ export default function Dashboard() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Subtle light green background accents */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-72 w-[90vw] rounded-full bg-gradient-to-r from-green-300/40 via-emerald-200/30 to-lime-200/40 blur-3xl" />
+        <div className="absolute bottom-[-6rem] right-[-6rem] h-80 w-80 rounded-full bg-gradient-to-tr from-emerald-200/40 to-green-300/50 blur-2xl" />
+      </div>
+
       <TopBar />
 
       <main className="container mx-auto px-4 py-6">
