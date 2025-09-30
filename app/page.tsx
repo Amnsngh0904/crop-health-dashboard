@@ -1,270 +1,175 @@
 "use client"
 
 import type React from "react"
-import { useRef, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { getFirebaseApp, isFirebaseConfigured } from "@/lib/firebase"
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
-import { Sprout, Droplets, Sun } from "lucide-react"
+import Link from "next/link"
 import Image from "next/image"
-import HeroStats from "@/components/HeroStats"
+import { Button } from "@/components/ui/button"
+import InView from "@/components/InView"
+import Timeline from "@/components/Timeline"
 
-export default function Home() {
-  const router = useRouter()
-  const [loginEmail, setLoginEmail] = useState("")
-  const [loginPassword, setLoginPassword] = useState("")
-  const [signupEmail, setSignupEmail] = useState("")
-  const [signupPassword, setSignupPassword] = useState("")
-  const [loading, setLoading] = useState<"login" | "signup" | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [showAuth, setShowAuth] = useState(false)
-
-  const configured = isFirebaseConfigured()
-
-  const authSectionRef = useRef<HTMLDivElement | null>(null)
-  const loginEmailRef = useRef<HTMLInputElement | null>(null)
-
-  function revealAuthAndScroll() {
-    if (!showAuth) setShowAuth(true)
-    // Allow render, then scroll and focus
-    setTimeout(() => {
-      authSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-      loginEmailRef.current?.focus()
-    }, 50)
-  }
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    if (!configured) {
-      setError("Firebase is not configured. Please set NEXT_PUBLIC_FIREBASE_* env vars and redeploy.")
-      return
-    }
-    setLoading("login")
-    try {
-      const auth = getAuth(getFirebaseApp())
-      await signInWithEmailAndPassword(auth, loginEmail, loginPassword)
-      router.push("/dashboard")
-    } catch (err: any) {
-      setError(err?.message || "Login failed")
-    } finally {
-      setLoading(null)
-    }
-  }
-
-  async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    if (!configured) {
-      setError("Firebase is not configured. Please set NEXT_PUBLIC_FIREBASE_* env vars and redeploy.")
-      return
-    }
-    setLoading("signup")
-    try {
-      const auth = getAuth(getFirebaseApp())
-      await createUserWithEmailAndPassword(auth, signupEmail, signupPassword)
-      router.push("/dashboard")
-    } catch (err: any) {
-      setError(err?.message || "Sign up failed")
-    } finally {
-      setLoading(null)
-    }
-  }
-
+export default function Home(): JSX.Element {
   return (
-    <main className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background agriculture gradient + subtle animated shapes */}
+    <div id="top" className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background gradient accents */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-72 w-[90vw] rounded-full bg-gradient-to-r from-green-300/40 via-emerald-200/30 to-lime-200/40 blur-3xl animate-in fade-in-0 zoom-in-95" />
-        <div className="absolute bottom-[-6rem] right-[-6rem] h-80 w-80 rounded-full bg-gradient-to-tr from-emerald-200/40 to-green-300/50 blur-2xl animate-pulse" />
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-56 w-[80vw] rounded-full bg-gradient-to-r from-green-300/30 via-emerald-200/20 to-lime-200/30 blur-3xl" />
+        <div className="absolute bottom-[-4rem] right-[-4rem] h-64 w-64 rounded-full bg-gradient-to-tr from-emerald-200/30 to-green-300/40 blur-2xl" />
       </div>
 
       <div className="container mx-auto px-4 py-12">
         {/* Hero */}
-        <section className="max-w-5xl mx-auto text-center mb-12">
-          <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground bg-secondary/40 animate-in fade-in-0 slide-in-from-top-2">
-            Smart agriculture • NDVI • Crop insights
-          </span>
-          <h1 className="mt-4 text-4xl md:text-5xl font-semibold tracking-tight text-pretty">
-            FarmAssist
-          </h1>
-          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Analyze fields, track NDVI and vegetation indices, and make data‑driven decisions for healthier yields.
-          </p>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <Button size="lg" className="shadow-md" onClick={revealAuthAndScroll}>
-              Get started
-            </Button>
-          </div>
-
-          {/* Agriculture themed feature badges */}
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-3 rounded-lg border p-4 bg-secondary/40 animate-in fade-in-0 slide-in-from-bottom-1">
-              <Sprout className="h-5 w-5 text-emerald-600" />
-              <span className="text-sm">Vegetation indices</span>
+        <section className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center mb-20">
+          {/* Left copy */}
+          <InView>
+            <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground bg-secondary/40">
+              Smart agriculture • NDVI • IoT • AI
+            </span>
+            <h1 className="mt-4 text-4xl md:text-5xl font-semibold tracking-tight text-pretty bg-gradient-to-r from-emerald-700 to-sky-700 bg-clip-text text-transparent">
+              AI‑Powered Precision Agriculture Platform
+            </h1>
+            <p className="mt-4 text-muted-foreground animate-in fade-in-0 slide-in-from-left-2">
+              Combining hyperspectral imaging, IoT sensors, and AI to predict crop stress, soil health, and pest risks in real time.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3 animate-bounce-in-up">
+              <Button asChild size="lg" className="shadow-sm bg-gradient-to-r from-emerald-600 to-sky-600 text-white">
+                <Link href="/auth/signup" target="_blank" rel="noopener noreferrer">
+                  Get Started
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="hover:scale-[1.02] transition-transform">
+                <Link href="#demo">
+                  Watch Demo
+                </Link>
+              </Button>
             </div>
-            <div className="flex items-center justify-center gap-3 rounded-lg border p-4 bg-secondary/40 animate-in fade-in-0 slide-in-from-bottom-1 delay-100">
-              <Droplets className="h-5 w-5 text-sky-600" />
-              <span className="text-sm">Irrigation cues</span>
-            </div>
-            <div className="flex items-center justify-center gap-3 rounded-lg border p-4 bg-secondary/40 animate-in fade-in-0 slide-in-from-bottom-1 delay-200">
-              <Sun className="h-5 w-5 text-amber-600" />
-              <span className="text-sm">Weather readiness</span>
-            </div>
-          </div>
+          </InView>
 
-          {/* Animated stats */}
-          <div className="mt-10">
-            <HeroStats />
-          </div>
-
-          {/* Preview panel */}
-          <div className="mt-10 max-w-5xl mx-auto">
-            <div className="rounded-xl border bg-card overflow-hidden shadow-sm group">
-              <div className="relative aspect-[16/7] w-full">
-                <Image
-                  src="/image.png"
-                  alt="Field preview"
-                  fill
-                  priority
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+          {/* Right illustration */}
+          <InView className="relative w-full aspect-[16/10] md:aspect-[4/3] lg:aspect-[16/9]" animation="animate-in fade-in-0 slide-in-from-right-4">
+            <div className="absolute inset-0 rounded-2xl border bg-card overflow-hidden animate-zoom-in-soft">
+              {/* Decorative background */}
+              <div className="absolute -top-10 -left-10 h-56 w-56 rounded-full bg-emerald-200/40 blur-2xl" />
+              <div className="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-sky-200/50 blur-2xl" />
+              {/* Placeholder hero image */}
+              <div className="relative h-full w-full">
+<Image src="/image.png" alt="Farm sensors and dashboard" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover opacity-90" />
               </div>
             </div>
-          </div>
-
-          {/* Stats strip */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <div className="rounded-lg border p-4 bg-secondary/40 text-sm">
-              <div className="text-2xl font-semibold">12</div>
-              Active fields
-            </div>
-            <div className="rounded-lg border p-4 bg-secondary/40 text-sm">
-              <div className="text-2xl font-semibold">+18%</div>
-              Avg. NDVI improvement
-            </div>
-            <div className="rounded-lg border p-4 bg-secondary/40 text-sm">
-              <div className="text-2xl font-semibold">3d</div>
-              Forecast horizon
-            </div>
-          </div>
-          {/* How it works */}
-          <section className="mt-12 max-w-5xl mx-auto">
-            <h2 className="text-xl font-semibold text-center mb-6">How it works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="rounded-xl border bg-secondary/40 p-4 animate-in fade-in-0 slide-in-from-bottom-1">
-                <div className="text-sm font-medium">1. Select your field</div>
-                <p className="text-muted-foreground text-sm mt-1">Mark boundaries and connect satellite layers.</p>
-              </div>
-              <div className="rounded-xl border bg-secondary/40 p-4 animate-in fade-in-0 slide-in-from-bottom-1 delay-100">
-                <div className="text-sm font-medium">2. Analyze NDVI</div>
-                <p className="text-muted-foreground text-sm mt-1">See trends, anomalies, irrigation cues.</p>
-              </div>
-              <div className="rounded-xl border bg-secondary/40 p-4 animate-in fade-in-0 slide-in-from-bottom-1 delay-200">
-                <div className="text-sm font-medium">3. Take action</div>
-                <p className="text-muted-foreground text-sm mt-1">Get recommendations and track outcomes.</p>
-              </div>
-            </div>
-          </section>
+          </InView>
         </section>
 
-        {/* Only show config warning when auth is revealed */}
-        {showAuth && !configured && (
-          <div className="max-w-4xl mx-auto mb-6 rounded-md border border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-200 p-3 text-sm">
-            Firebase is not configured locally. Add NEXT_PUBLIC_FIREBASE_* to .env.local, then restart the dev server.
+        {/* About */}
+        <InView as="section" id="about" className="mt-20 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="relative w-full aspect-[4/3] rounded-xl border bg-secondary/40 overflow-hidden">
+              <Image src="/image.png" alt="Farmer monitoring dashboard" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold mb-2">Why this platform?</h2>
+              <p className="text-muted-foreground">
+                Traditional farming faces unpredictable crop failures, inefficient irrigation, and soil degradation. Our platform brings data‑driven insights using AI, drones, and IoT to empower farmers with precision agriculture.
+              </p>
+            </div>
           </div>
-        )}
+        </InView>
 
-        {showAuth && error && <div className="max-w-2xl mx-auto mb-6 text-sm text-destructive">{error}</div>}
+        {/* Features */}
+        <section id="features" className="mt-16 max-w-6xl mx-auto">
+          <h2 className="text-2xl font-semibold text-center mb-6">Key Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <InView className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]" delay={0}>
+              <div className="text-lg font-medium">🌍 Hyperspectral Imaging</div>
+              <p className="text-sm text-muted-foreground mt-1">Detect crop health and soil indices from satellite and aerial data.</p>
+            </InView>
+            <InView className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]" delay={100}>
+              <div className="text-lg font-medium">💧 IoT Soil Sensors</div>
+              <p className="text-sm text-muted-foreground mt-1">Real-time soil moisture, salinity, and temperature monitoring.</p>
+            </InView>
+            <InView className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]" delay={200}>
+              <div className="text-lg font-medium">🤖 AI Predictions</div>
+              <p className="text-sm text-muted-foreground mt-1">Stress, disease, and pest outbreak risk using ML models.</p>
+            </InView>
+            <InView className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]" delay={300}>
+              <div className="text-lg font-medium">📊 Dashboard & Alerts</div>
+              <p className="text-sm text-muted-foreground mt-1">Interactive maps, anomaly detection, and instant alerts.</p>
+            </InView>
+          </div>
+        </section>
 
-        {/* Auth forms */}
-        {showAuth && (
-          <div id="auth" ref={authSectionRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          <Card className="backdrop-blur supports-[backdrop-filter]:bg-card/80 animate-in fade-in-0 slide-in-from-bottom-2">
-            <CardHeader>
-              <CardTitle>Login</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-4" onSubmit={handleLogin}>
-                <div className="space-y-2">
-                  <label htmlFor="login-email" className="text-sm">
-                    Email
-                  </label>
-                  <Input
-                    id="login-email"
-                    ref={loginEmailRef}
-                    type="email"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="login-password" className="text-sm">
-                    Password
-                  </label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading === "login" || !configured}>
-                  {loading === "login" ? "Logging in..." : "Login"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+        {/* How it works */}
+        <InView as="section" className="mt-16 max-w-6xl mx-auto" id="how-it-works">
+          <h2 className="text-2xl font-semibold text-center mb-6">How It Works</h2>
+          <Timeline
+            showProgress={false}
+            steps={[
+              { title: 'Data Collection', desc: 'Drones, IoT sensors, satellites' },
+              { title: 'AI Processing', desc: 'CNN/LSTM models analyze multi‑modal data' },
+              { title: 'Fusion', desc: 'Combining sensor + image data' },
+              { title: 'Insights & Alerts', desc: 'Delivered via web/mobile dashboard' },
+            ]}
+          />
+        </InView>
 
-          <Card className="backdrop-blur supports-[backdrop-filter]:bg-card/80 animate-in fade-in-0 slide-in-from-bottom-2 delay-150">
-            <CardHeader>
-              <CardTitle>Sign Up</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-4" onSubmit={handleSignup}>
-                <div className="space-y-2">
-                  <label htmlFor="signup-email" className="text-sm">
-                    Email
-                  </label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={signupEmail}
-                    onChange={(e) => setSignupEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="signup-password" className="text-sm">
-                    Password
-                  </label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    placeholder="Create a password"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading === "signup" || !configured}>
-                  {loading === "signup" ? "Creating..." : "Create Account"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-        )}
+        {/* Impact */}
+        <InView as="section" id="impact" className="mt-20 max-w-7xl mx-auto">
+          <h2 className="text-2xl font-semibold text-center mb-6">Impact on Farmers & Agriculture</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.01]">
+              <div className="text-lg">🌾 Higher Yields</div>
+              <p className="text-sm text-muted-foreground mt-1">Detect crop stress early, save crops.</p>
+            </div>
+            <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]">
+              <div className="text-lg">💰 Reduced Costs</div>
+              <p className="text-sm text-muted-foreground mt-1">Targeted irrigation & fertilizer use.</p>
+            </div>
+            <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]">
+              <div className="text-lg">🌱 Sustainable Farming</div>
+              <p className="text-sm text-muted-foreground mt-1">Minimize wastage; improve soil health.</p>
+            </div>
+          </div>
+        </InView>
+
+        {/* Demo section */}
+        <InView as="section" className="mt-20 max-w-7xl mx-auto" id="demo">
+          <h2 className="text-2xl font-semibold text-center mb-6">Product Demo</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft">
+              <Image src="/image.png" alt="Interactive map mockup" width={1200} height={700} className="h-full w-full object-cover" />
+            </div>
+            <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft" style={{ animationDelay: '120ms' }}>
+              <Image src="/image.png" alt="AI alerts mockup" width={1200} height={700} className="h-full w-full object-cover" />
+            </div>
+          </div>
+          <div className="mt-6 text-center">
+            <Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-sky-500 text-white animate-glow">
+              <Link href="/auth/signup" target="_blank" rel="noopener noreferrer">Try Live Demo</Link>
+            </Button>
+          </div>
+        </InView>
+
+        {/* Final CTA */}
+        <InView as="section" className="mt-24">
+          <div className="max-w-6xl mx-auto rounded-2xl border p-8 text-center bg-secondary/40">
+            <h3 className="text-2xl md:text-3xl font-semibold">Empowering Farmers with AI‑driven Insights</h3>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <Button asChild size="lg">
+                <Link href="/auth/signup" target="_blank" rel="noopener noreferrer">🚀 Get Early Access</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/auth/login" target="_blank" rel="noopener noreferrer">🔑 Login / Signup</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg">
+                <Link href="#contact">📩 Contact Us</Link>
+              </Button>
+            </div>
+          </div>
+        </InView>
       </div>
-    </main>
+
+      {/* Contact footer anchor */}
+      <footer id="contact" className="mt-16 text-center text-sm text-muted-foreground">
+        <p>Contact: support@farmassist.local</p>
+      </footer>
+    </div>
   )
 }

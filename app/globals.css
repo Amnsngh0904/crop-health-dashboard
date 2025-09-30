@@ -123,7 +123,7 @@
   * {
     @apply border-border outline-ring/50;
   }
-body {
+  body {
     @apply bg-background text-foreground;
     /* Light green gradient background */
     background-image: radial-gradient(60% 60% at 20% 0%, color(display-p3 0.86 0.96 0.86) 0%, transparent 60%),
@@ -137,3 +137,34 @@ body {
     background-image: none;
   }
 }
+
+/* Custom keyframes/utilities for subtle motion */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+  50% { box-shadow: 0 0 24px rgba(16, 185, 129, .25); }
+}
+
+@layer utilities {
+  .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+  .animate-glow { animation: glow-pulse 3.5s ease-in-out infinite; }
+  .animate-zoom-in-soft { animation: zoom-in-soft .8s ease both; }
+  .animate-bounce-in-up { animation: bounce-in-up .7s ease-out both; }
+  .link-underline { position: relative; }
+  .link-underline::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 100%; height: 2px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+  .link-underline:hover::after { transform: scaleX(1); }
+  .typewriter { overflow: hidden; white-space: nowrap; border-right: 2px solid currentColor; animation: typing steps(36,end) 2.4s 0.2s both, caret 1s steps(1,end) infinite; }
+  .typewriter-slow { overflow: hidden; white-space: nowrap; border-right: 2px solid currentColor; animation: typing steps(40,end) 3s 0.2s both, caret 1s steps(1,end) infinite; }
+}
+
+@keyframes zoom-in-soft { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes bounce-in-up { 0% { opacity: 0; transform: translateY(24px); } 60% { opacity: 1; transform: translateY(-6px);} 100% { transform: translateY(0);} }
+@keyframes typing { from { width: 0 } to { width: 100% } }
+@keyframes caret { 0%, 100% { border-color: transparent } 50% { border-color: currentColor } }
+
+/* Animated gradient waves for CTA background */
+@keyframes gradient-wave { 0% { background-position: 0% 50% } 50% { background-position: 100% 50% } 100% { background-position: 0% 50% } }
+.gradient-waves { background: linear-gradient(90deg, rgba(16,185,129,.15), rgba(56,189,248,.15), rgba(16,185,129,.15)); background-size: 200% 200%; animation: gradient-wave 12s ease infinite; }
