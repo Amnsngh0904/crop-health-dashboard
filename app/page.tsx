@@ -52,7 +52,7 @@ export default function Home(): JSX.Element {
               <div className="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-sky-200/50 blur-2xl" />
               {/* Placeholder hero image */}
               <div className="relative h-full w-full">
-<Image src="/image.png" alt="Farm sensors and dashboard" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover opacity-90" />
+<Image src="/image.png" alt="Farm sensors and dashboard" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-contain opacity-90" />
               </div>
             </div>
           </InView>
@@ -63,7 +63,7 @@ export default function Home(): JSX.Element {
           <section id="about">
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="relative w-full aspect-[4/3] rounded-xl border bg-secondary/40 overflow-hidden">
-                <Image src="/image.png" alt="Farmer monitoring dashboard" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
+<Image src="/why.png" alt="Farmer monitoring dashboard" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-contain" />
               </div>
               <div>
                 <h2 className="text-2xl font-semibold mb-2">Why this platform?</h2>
@@ -137,14 +137,14 @@ export default function Home(): JSX.Element {
 
         {/* Demo section */}
         <section id="demo">
-          <InView as="section" className="mt-20 max-w-7xl mx-auto">
+          <InView as="section" className="mt-20 md:max-w-7xl md:mx-auto -mx-4">
             <h2 className="text-2xl font-semibold text-center mb-6">Product Demo</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft">
-                <Image src="/image.png" alt="Interactive map mockup" width={1200} height={700} className="h-full w-full object-cover" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-0">
+              <div className="relative rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft h-64 md:h-80">
+                <Image src="/demo1.png" alt="Interactive map mockup" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-contain" />
               </div>
-              <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft" style={{ animationDelay: '120ms' }}>
-                <Image src="/image.png" alt="AI alerts mockup" width={1200} height={700} className="h-full w-full object-cover" />
+              <div className="relative rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft h-64 md:h-80" style={{ animationDelay: '120ms' }}>
+                <Image src="/demo2.png" alt="AI alerts mockup" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-contain" />
               </div>
             </div>
             <div className="mt-6 text-center">

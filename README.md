@@ -1,11 +1,19 @@
-# Crop health dashboard
+# FarmAssist - Your Digital Partner for Healthy Crops
 
 
 ## Deployment
 
-Your project is live at:
+FarmAssist is live at:
 
 **[https://crop-health-dashboard-ten.vercel.app/](https://crop-health-dashboard-ten.vercel.app/)**
+
+### Features
+
+- **Multilingual Support**: Hindi and English language options
+- **Audio Input**: Voice recognition for chatbot interactions
+- **Interactive Dashboard**: Real-time crop health monitoring
+- **Responsive Design**: Works on desktop and mobile devices
+- **Realtime Authentication and Data storage**: Secure user login and instant data syncing to keep crop health records up to date
 
 ## Local Setup Instructions (Windows & macOS)
 
@@ -65,13 +73,7 @@ crop-health-dashboard/
 └── README.md            # This file
 \`\`\`
 
-### Features
 
-- **Multilingual Support**: Hindi and English language options
-- **Audio Input**: Voice recognition for chatbot interactions
-- **Interactive Dashboard**: Real-time crop health monitoring
-- **Responsive Design**: Works on desktop and mobile devices
-- **Dark/Light Mode**: Theme switching capability
 
 ### Troubleshooting
 
@@ -90,12 +92,7 @@ crop-health-dashboard/
    - Check Node.js version: `node --version` (should be 18+)
    - Clear Next.js cache: `rm -rf .next`
 
-### Browser Compatibility
 
-- Chrome 80+
-- Firefox 75+
-- Safari 13+
-- Edge 80+
 
 ### Contributing
 
