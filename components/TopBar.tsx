@@ -4,11 +4,24 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Download, Settings } from "lucide-react"
+import { Calendar, Download, Settings, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { getFirebaseApp } from "@/lib/firebase"
+import { getAuth, signOut } from "firebase/auth"
 
 export default function TopBar() {
   const [selectedProject, setSelectedProject] = useState("field-alpha-01")
   const [dateRange, setDateRange] = useState("last-7-days")
+  const router = useRouter()
+
+  async function handleLogout() {
+    const auth = getAuth(getFirebaseApp())
+    try {
+      await signOut(auth)
+    } finally {
+      router.replace("/")
+    }
+  }
 
   return (
     <Card className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
@@ -18,9 +31,10 @@ export default function TopBar() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">CH</span>
+                <span className="text-primary-foreground font-bold text-sm">FA</span>
               </div>
-              <h1 className="text-xl font-semibold text-foreground">Crop Health Monitor</h1>
+              {/* Renamed */}
+              <h1 className="text-xl font-semibold text-foreground">FarmAssist</h1>
             </div>
 
             <div className="flex items-center gap-3">
@@ -50,7 +64,7 @@ export default function TopBar() {
             </div>
           </div>
 
-          {/* Right Section - removed upload and start analysis buttons */}
+          {/* Right Section */}
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
@@ -59,6 +73,12 @@ export default function TopBar() {
 
             <Button variant="ghost" size="sm">
               <Settings className="w-4 h-4" />
+            </Button>
+
+            {/* Logout */}
+            <Button variant="destructive" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>

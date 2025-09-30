@@ -1,15 +1,13 @@
 "use client"
 
 import type React from "react"
-import type { SpeechRecognition } from "web-speech-api"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
-import { MessageCircle, Send, X, Minimize2, Mic, MicOff, Languages } from "lucide-react"
+import { MessageCircle, Send, X, Minimize2, Mic, MicOff, Languages, Volume2, VolumeX } from "lucide-react"
 
 interface Message {
   id: string
@@ -20,11 +18,13 @@ interface Message {
 }
 
 type Language = "en" | "hi"
+type SpeechRecognitionLike = any
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<Language>("en")
   const [isRecording, setIsRecording] = useState(false)
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -36,48 +36,106 @@ export default function ChatBot() {
   ])
   const [inputValue, setInputValue] = useState("")
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+  const inputRef = useRef<string>("")
 
+  // Keep a ref of inputValue for onend auto-send
   useEffect(() => {
-    if (typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-      recognitionRef.current = new SpeechRecognition()
+    inputRef.current = inputValue
+  }, [inputValue])
 
-      if (recognitionRef.current) {
-        recognitionRef.current.continuous = false
-        recognitionRef.current.interimResults = false
-        recognitionRef.current.lang = selectedLanguage === "hi" ? "hi-IN" : "en-US"
+  // Initialize SpeechRecognition ONCE
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) return
 
-        recognitionRef.current.onresult = (event) => {
-          const transcript = event.results[0][0].transcript
-          setInputValue(transcript)
-          setIsRecording(false)
-        }
+    const recog = new SR()
+    recog.continuous = false
+    recog.interimResults = true // allow live updates
+    recog.maxAlternatives = 1
+    recog.lang = selectedLanguage === "hi" ? "hi-IN" : "en-US"
 
-        recognitionRef.current.onerror = () => {
-          setIsRecording(false)
-        }
+    recog.onresult = (event: any) => {
+      // Use the last result; if interim, this updates the input field live
+      const res = event.results[event.results.length - 1]
+      const transcript = res[0]?.transcript ?? ""
+      setInputValue((prev) => {
+        // Replace with the latest interim or final transcript
+        return transcript
+      })
+    }
 
-        recognitionRef.current.onend = () => {
-          setIsRecording(false)
-        }
+    recog.onerror = () => {
+      setIsRecording(false)
+    }
+
+    recog.onend = () => {
+      // Auto-send the captured speech if present
+      setIsRecording(false)
+      const text = inputRef.current?.trim()
+      if (text) {
+        handleSendMessage(text)
       }
     }
-  }, [selectedLanguage])
 
+    recognitionRef.current = recog
+    return () => {
+      try {
+        recog.stop()
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // once
+
+  // Update language dynamically
   useEffect(() => {
     if (recognitionRef.current) {
       recognitionRef.current.lang = selectedLanguage === "hi" ? "hi-IN" : "en-US"
     }
   }, [selectedLanguage])
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return
+  // Speak the last bot message if voice enabled
+  useEffect(() => {
+    if (!isVoiceEnabled || typeof window === "undefined" || !("speechSynthesis" in window)) return
+    const last = messages[messages.length - 1]
+    if (!last || last.sender !== "bot") return
+
+    try {
+      window.speechSynthesis.cancel()
+      const utter = new SpeechSynthesisUtterance(last.text)
+      utter.lang = selectedLanguage === "hi" ? "hi-IN" : "en-US"
+      const voices = window.speechSynthesis.getVoices()
+      const voice =
+        voices.find((v) => v.lang === utter.lang) || voices.find((v) => v.lang.startsWith(utter.lang.split("-")[0]))
+      if (voice) utter.voice = voice
+      window.speechSynthesis.speak(utter)
+    } catch {
+      // no-op
+    }
+  }, [messages, isVoiceEnabled, selectedLanguage])
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isVoiceEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel()
+    }
+  }, [isVoiceEnabled])
+
+  function handleSendMessage(textOverride?: string) {
+    const text = (textOverride ?? inputValue).trim()
+    if (!text) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputValue,
+      text,
       sender: "user",
       timestamp: new Date(),
       language: selectedLanguage,
@@ -103,8 +161,21 @@ export default function ChatBot() {
     }, 1000)
   }
 
-  const toggleRecording = () => {
-    if (!recognitionRef.current) {
+  async function requestMicPermissionOnce() {
+    try {
+      if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        // Immediately stop tracks; we only needed the permission prompt
+        stream.getTracks().forEach((t) => t.stop())
+      }
+    } catch {
+      // If denied, recognition may still work depending on browser; ignore here
+    }
+  }
+
+  const toggleRecording = async () => {
+    const recog = recognitionRef.current
+    if (!recog) {
       alert(
         selectedLanguage === "hi"
           ? "आपका ब्राउज़र स्पीच रिकग्निशन का समर्थन नहीं करता"
@@ -114,15 +185,23 @@ export default function ChatBot() {
     }
 
     if (isRecording) {
-      recognitionRef.current.stop()
+      try {
+        recog.stop()
+      } catch {}
       setIsRecording(false)
     } else {
-      recognitionRef.current.start()
-      setIsRecording(true)
+      await requestMicPermissionOnce()
+      try {
+        setInputValue("") // reset input for new capture
+        recog.start()
+        setIsRecording(true)
+      } catch {
+        setIsRecording(false)
+      }
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  function handleKeyPress(e: React.KeyboardEvent) {
     if (e.key === "Enter") {
       handleSendMessage()
     }
@@ -167,7 +246,7 @@ export default function ChatBot() {
                 {selectedLanguage === "hi" ? "फसल स्वास्थ्य सहायक" : "Crop Health Assistant"}
               </CardTitle>
               <div className="flex gap-2">
-                <Select value={selectedLanguage} onValueChange={(value: Language) => setSelectedLanguage(value)}>
+                <Select value={selectedLanguage} onValueChange={(value: any) => setSelectedLanguage(value)}>
                   <SelectTrigger className="w-20 h-8">
                     <Languages className="h-4 w-4" />
                   </SelectTrigger>
@@ -176,6 +255,24 @@ export default function ChatBot() {
                     <SelectItem value="hi">हिं</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsVoiceEnabled((v) => !v)}
+                  className="h-8 w-8"
+                  aria-label={isVoiceEnabled ? "Disable voice" : "Enable voice"}
+                  title={
+                    isVoiceEnabled
+                      ? selectedLanguage === "hi"
+                        ? "आवाज़ बंद करें"
+                        : "Disable voice"
+                      : selectedLanguage === "hi"
+                        ? "आवाज़ चालू करें"
+                        : "Enable voice"
+                  }
+                >
+                  {isVoiceEnabled ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                </Button>
                 <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
                   <Minimize2 className="h-4 w-4" />
                 </Button>
@@ -235,7 +332,7 @@ export default function ChatBot() {
                 >
                   {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
-                <Button onClick={handleSendMessage} size="icon">
+                <Button onClick={() => handleSendMessage()} size="icon">
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
