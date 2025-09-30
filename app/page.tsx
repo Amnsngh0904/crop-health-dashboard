@@ -59,18 +59,20 @@ export default function Home(): JSX.Element {
         </section>
 
         {/* About */}
-        <InView as="section" id="about" className="mt-20 max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div className="relative w-full aspect-[4/3] rounded-xl border bg-secondary/40 overflow-hidden">
-              <Image src="/image.png" alt="Farmer monitoring dashboard" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
+        <InView as="section" className="mt-20 max-w-7xl mx-auto">
+          <section id="about">
+            <div className="grid md:grid-cols-2 gap-10 items-center">
+              <div className="relative w-full aspect-[4/3] rounded-xl border bg-secondary/40 overflow-hidden">
+                <Image src="/image.png" alt="Farmer monitoring dashboard" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold mb-2">Why this platform?</h2>
+                <p className="text-muted-foreground">
+                  Traditional farming faces unpredictable crop failures, inefficient irrigation, and soil degradation. Our platform brings data‑driven insights using AI, drones, and IoT to empower farmers with precision agriculture.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-semibold mb-2">Why this platform?</h2>
-              <p className="text-muted-foreground">
-                Traditional farming faces unpredictable crop failures, inefficient irrigation, and soil degradation. Our platform brings data‑driven insights using AI, drones, and IoT to empower farmers with precision agriculture.
-              </p>
-            </div>
-          </div>
+          </section>
         </InView>
 
         {/* Features */}
@@ -97,55 +99,61 @@ export default function Home(): JSX.Element {
         </section>
 
         {/* How it works */}
-        <InView as="section" className="mt-16 max-w-6xl mx-auto" id="how-it-works">
-          <h2 className="text-2xl font-semibold text-center mb-6">How It Works</h2>
-          <Timeline
-            showProgress={false}
-            steps={[
-              { title: 'Data Collection', desc: 'Drones, IoT sensors, satellites' },
-              { title: 'AI Processing', desc: 'CNN/LSTM models analyze multi‑modal data' },
-              { title: 'Fusion', desc: 'Combining sensor + image data' },
-              { title: 'Insights & Alerts', desc: 'Delivered via web/mobile dashboard' },
-            ]}
-          />
-        </InView>
+        <section id="how-it-works">
+          <InView as="section" className="mt-16 max-w-6xl mx-auto">
+            <h2 className="text-2xl font-semibold text-center mb-6">How It Works</h2>
+            <Timeline
+              showProgress={false}
+              steps={[
+                { title: 'Data Collection', desc: 'Drones, IoT sensors, satellites' },
+                { title: 'AI Processing', desc: 'CNN/LSTM models analyze multi‑modal data' },
+                { title: 'Fusion', desc: 'Combining sensor + image data' },
+                { title: 'Insights & Alerts', desc: 'Delivered via web/mobile dashboard' },
+              ]}
+            />
+          </InView>
+        </section>
 
         {/* Impact */}
-        <InView as="section" id="impact" className="mt-20 max-w-7xl mx-auto">
-          <h2 className="text-2xl font-semibold text-center mb-6">Impact on Farmers & Agriculture</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.01]">
-              <div className="text-lg">🌾 Higher Yields</div>
-              <p className="text-sm text-muted-foreground mt-1">Detect crop stress early, save crops.</p>
+        <InView as="section" className="mt-20 max-w-7xl mx-auto">
+          <section id="impact">
+            <h2 className="text-2xl font-semibold text-center mb-6">Impact on Farmers & Agriculture</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.01]">
+                <div className="text-lg">🌾 Higher Yields</div>
+                <p className="text-sm text-muted-foreground mt-1">Detect crop stress early, save crops.</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]">
+                <div className="text-lg">💰 Reduced Costs</div>
+                <p className="text-sm text-muted-foreground mt-1">Targeted irrigation & fertilizer use.</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]">
+                <div className="text-lg">🌱 Sustainable Farming</div>
+                <p className="text-sm text-muted-foreground mt-1">Minimize wastage; improve soil health.</p>
+              </div>
             </div>
-            <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]">
-              <div className="text-lg">💰 Reduced Costs</div>
-              <p className="text-sm text-muted-foreground mt-1">Targeted irrigation & fertilizer use.</p>
-            </div>
-            <div className="rounded-xl border bg-card p-4 transition-transform hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]">
-              <div className="text-lg">🌱 Sustainable Farming</div>
-              <p className="text-sm text-muted-foreground mt-1">Minimize wastage; improve soil health.</p>
-            </div>
-          </div>
+          </section>
         </InView>
 
         {/* Demo section */}
-        <InView as="section" className="mt-20 max-w-7xl mx-auto" id="demo">
-          <h2 className="text-2xl font-semibold text-center mb-6">Product Demo</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft">
-              <Image src="/image.png" alt="Interactive map mockup" width={1200} height={700} className="h-full w-full object-cover" />
+        <section id="demo">
+          <InView as="section" className="mt-20 max-w-7xl mx-auto">
+            <h2 className="text-2xl font-semibold text-center mb-6">Product Demo</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft">
+                <Image src="/image.png" alt="Interactive map mockup" width={1200} height={700} className="h-full w-full object-cover" />
+              </div>
+              <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft" style={{ animationDelay: '120ms' }}>
+                <Image src="/image.png" alt="AI alerts mockup" width={1200} height={700} className="h-full w-full object-cover" />
+              </div>
             </div>
-            <div className="h-56 rounded-xl border bg-secondary/40 overflow-hidden animate-zoom-in-soft" style={{ animationDelay: '120ms' }}>
-              <Image src="/image.png" alt="AI alerts mockup" width={1200} height={700} className="h-full w-full object-cover" />
+            <div className="mt-6 text-center">
+              <Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-sky-500 text-white animate-glow">
+                <Link href="/auth/signup" target="_blank" rel="noopener noreferrer">Try Live Demo</Link>
+              </Button>
             </div>
-          </div>
-          <div className="mt-6 text-center">
-            <Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-sky-500 text-white animate-glow">
-              <Link href="/auth/signup" target="_blank" rel="noopener noreferrer">Try Live Demo</Link>
-            </Button>
-          </div>
-        </InView>
+          </InView>
+        </section>
 
         {/* Final CTA */}
         <InView as="section" className="mt-24">

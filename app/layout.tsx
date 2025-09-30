@@ -29,13 +29,13 @@ export default function RootLayout({
               <span>FarmAssist</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground animate-in fade-in-0 slide-in-from-top-3">
-              <Link href="#top" className="hover:text-foreground link-underline">Home</Link>
-              <Link href="#about" className="hover:text-foreground link-underline">About</Link>
-              <Link href="#features" className="hover:text-foreground link-underline">Features</Link>
-              <Link href="#how-it-works" className="hover:text-foreground link-underline">How It Works</Link>
-              <Link href="#impact" className="hover:text-foreground link-underline">Impact</Link>
-              <Link href="#demo" className="hover:text-foreground link-underline">Demo</Link>
-              <Link href="#contact" className="hover:text-foreground link-underline">Contact</Link>
+              <Link href="/#home" className="hover:text-foreground link-underline">Home</Link>
+              <Link href="/#about" className="hover:text-foreground link-underline">About</Link>
+              <Link href="/#features" className="hover:text-foreground link-underline">Features</Link>
+              <Link href="/#how-it-works" className="hover:text-foreground link-underline">How It Works</Link>
+              <Link href="/#impact" className="hover:text-foreground link-underline">Impact</Link>
+              <Link href="/#demo" className="hover:text-foreground link-underline">Demo</Link>
+              <Link href="/#contact" className="hover:text-foreground link-underline">Contact</Link>
             </nav>
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost">
