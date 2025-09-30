@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Download, Settings, LogOut } from "lucide-react"
+import { Calendar, Download, Settings, LogOut, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { getFirebaseApp } from "@/lib/firebase"
 import { getAuth, signOut } from "firebase/auth"
@@ -13,6 +13,8 @@ export default function TopBar() {
   const [selectedProject, setSelectedProject] = useState("field-alpha-01")
   const [dateRange, setDateRange] = useState("last-7-days")
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [tiffName, setTiffName] = useState<string | null>(null)
 
   async function handleLogout() {
     const auth = getAuth(getFirebaseApp())
@@ -66,6 +68,27 @@ export default function TopBar() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".tif,.tiff,image/tiff"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (!f) return
+                const name = f.name.toLowerCase()
+                if (!name.endsWith(".tif") && !name.endsWith(".tiff")) {
+                  alert("Please select a .tiff/.tif file")
+                  e.currentTarget.value = ""
+                  return
+                }
+                setTiffName(f.name)
+                // TODO: Hook into processing/upload pipeline here
+              }}
+            />
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} title="Upload image">
+              <Upload className="w-4 h-4 mr-2" /> Upload image
+            </Button>
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export Data
